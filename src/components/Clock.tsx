@@ -1,27 +1,27 @@
 import { useState, useEffect } from "react";
 import { Text } from "@react-three/drei";
-
-// Constants for colors
-const COLORS = {
-  background: "#f5f5f5",
-  hourHand: "#1e88e5", // Kandinsky blue
-  minuteHand: "#ffd600", // Kandinsky yellow
-  secondHand: "#d32f2f", // Kandinsky red
-  numbers: "#000000",
-};
+import { ClockControls } from "./ClockControls";
+import type { ClockConfig } from "../types/clock";
+import { DEFAULT_COLORS } from "../types/clock";
 
 // Clock face component
-const ClockFace = () => {
+const ClockFace = ({ color }: { color: string }) => {
   return (
     <mesh>
       <circleGeometry args={[5, 128]} />
-      <meshBasicMaterial color={COLORS.background} />
+      <meshBasicMaterial color={color} />
     </mesh>
   );
 };
 
 // Hour numbers component
-const HourNumbers = ({ radius = 3 }: { radius?: number }) => {
+const HourNumbers = ({
+  radius = 3,
+  color,
+}: {
+  radius?: number;
+  color: string;
+}) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i + 1);
   return (
     <group>
@@ -34,7 +34,7 @@ const HourNumbers = ({ radius = 3 }: { radius?: number }) => {
             key={num}
             position={[x, y, 0.1]}
             fontSize={0.5}
-            color={COLORS.numbers}
+            color={color}
             anchorX="center"
             anchorY="middle"
             font="/fonts/JetBrainsMono-Regular.ttf"
@@ -48,7 +48,13 @@ const HourNumbers = ({ radius = 3 }: { radius?: number }) => {
 };
 
 // Minute numbers component
-const MinuteNumbers = ({ radius = 3.75 }: { radius?: number }) => {
+const MinuteNumbers = ({
+  radius = 3.75,
+  color,
+}: {
+  radius?: number;
+  color: string;
+}) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i * 5);
   return (
     <group>
@@ -61,7 +67,7 @@ const MinuteNumbers = ({ radius = 3.75 }: { radius?: number }) => {
             key={num}
             position={[x, y, 0.1]}
             fontSize={0.3}
-            color={COLORS.numbers}
+            color={color}
             anchorX="center"
             anchorY="middle"
             font="/fonts/JetBrainsMono-Regular.ttf"
@@ -75,7 +81,13 @@ const MinuteNumbers = ({ radius = 3.75 }: { radius?: number }) => {
 };
 
 // Tick marks component
-const TickMarks = ({ radius = 4.25 }: { radius?: number }) => {
+const TickMarks = ({
+  radius = 4.25,
+  color,
+}: {
+  radius?: number;
+  color: string;
+}) => {
   const ticks = Array.from({ length: 60 }, (_, i) => i);
   return (
     <group>
@@ -83,13 +95,11 @@ const TickMarks = ({ radius = 4.25 }: { radius?: number }) => {
         const angle = ((tick - 15) * Math.PI * 2) / 60;
         const isMajorTick = tick % 5 === 0;
         const length = isMajorTick ? 0.3 : 0.15;
-        // Calculate the end point of the tick mark
         const endRadius = radius + length;
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
         const endX = Math.cos(angle) * endRadius;
         const endY = Math.sin(angle) * endRadius;
-        // Calculate the center point and length of the tick mark
         const centerX = (x + endX) / 2;
         const centerY = (y + endY) / 2;
         const tickLength = Math.sqrt(
@@ -102,7 +112,7 @@ const TickMarks = ({ radius = 4.25 }: { radius?: number }) => {
             rotation={[0, 0, angle + Math.PI / 2]}
           >
             <boxGeometry args={[0.05, tickLength, 0.05]} />
-            <meshBasicMaterial color={COLORS.numbers} />
+            <meshBasicMaterial color={color} />
           </mesh>
         );
       })}
@@ -115,10 +125,16 @@ const ClockHands = ({
   hourHandRadius = 2,
   minuteHandRadius = 3,
   secondHandRadius = 3.5,
+  colors,
 }: {
   hourHandRadius?: number;
   minuteHandRadius?: number;
   secondHandRadius?: number;
+  colors: {
+    hourHand: string;
+    minuteHand: string;
+    secondHand: string;
+  };
 }) => {
   const [time, setTime] = useState(new Date());
 
@@ -143,7 +159,7 @@ const ClockHands = ({
       <group rotation={[0, 0, hourAngle]}>
         <mesh position={[0, hourHandRadius / 2, 0]}>
           <boxGeometry args={[0.1, hourHandRadius, 0.1]} />
-          <meshBasicMaterial color={COLORS.hourHand} />
+          <meshBasicMaterial color={colors.hourHand} />
         </mesh>
       </group>
 
@@ -151,7 +167,7 @@ const ClockHands = ({
       <group rotation={[0, 0, minuteAngle]}>
         <mesh position={[0, minuteHandRadius / 2, 0]}>
           <boxGeometry args={[0.1, minuteHandRadius, 0.1]} />
-          <meshBasicMaterial color={COLORS.minuteHand} />
+          <meshBasicMaterial color={colors.minuteHand} />
         </mesh>
       </group>
 
@@ -159,7 +175,7 @@ const ClockHands = ({
       <group rotation={[0, 0, secondAngle]}>
         <mesh position={[0, secondHandRadius / 2, 0]}>
           <boxGeometry args={[0.05, secondHandRadius, 0.05]} />
-          <meshBasicMaterial color={COLORS.secondHand} />
+          <meshBasicMaterial color={colors.secondHand} />
         </mesh>
       </group>
     </group>
@@ -167,14 +183,18 @@ const ClockHands = ({
 };
 
 // Main Clock component
-export const Clock = () => {
+interface ClockProps {
+  config: ClockConfig;
+}
+
+export const Clock = ({ config }: ClockProps) => {
   return (
     <group position={[0, 0, 0]} scale={0.9}>
-      <ClockFace />
-      <TickMarks />
-      <HourNumbers />
-      <MinuteNumbers />
-      <ClockHands />
+      <ClockFace color={config.colors.background} />
+      <TickMarks color={config.colors.numbers} />
+      <HourNumbers color={config.colors.numbers} />
+      <MinuteNumbers color={config.colors.numbers} />
+      <ClockHands colors={config.colors} />
     </group>
   );
 };
