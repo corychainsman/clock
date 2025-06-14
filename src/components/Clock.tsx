@@ -14,7 +14,7 @@ const COLORS = {
 const ClockFace = () => {
   return (
     <mesh>
-      <circleGeometry args={[5, 32]} />
+      <circleGeometry args={[5, 128]} />
       <meshBasicMaterial color={COLORS.background} />
     </mesh>
   );
@@ -99,7 +99,7 @@ const TickMarks = ({ radius = 4.25 }: { radius?: number }) => {
           <mesh
             key={tick}
             position={[centerX, centerY, 0.1]}
-            rotation={[0, 0, angle]}
+            rotation={[0, 0, angle + Math.PI / 2]}
           >
             <boxGeometry args={[0.05, tickLength, 0.05]} />
             <meshBasicMaterial color={COLORS.numbers} />
@@ -169,7 +169,7 @@ const ClockHands = ({
 // Main Clock component
 export const Clock = () => {
   return (
-    <group>
+    <group position={[0, 0, 0]} scale={0.9}>
       <ClockFace />
       <TickMarks />
       <HourNumbers />
