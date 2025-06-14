@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Pane } from "tweakpane";
 import type { ClockConfig } from "../types/clock";
-import { DEFAULT_COLORS, DEFAULT_RADII } from "../types/clock";
 
 interface ClockControlsProps {
   config: ClockConfig;
