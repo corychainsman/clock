@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Pane } from "tweakpane";
 import type { ClockConfig } from "../types/clock";
-import { DEFAULT_COLORS } from "../types/clock";
+import { DEFAULT_COLORS, DEFAULT_RADII } from "../types/clock";
 
 interface ClockControlsProps {
   config: ClockConfig;
@@ -41,6 +41,35 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
             },
           });
         });
+      }
+    );
+
+    // Add radius controls
+    const radiusFolder = pane.addFolder({
+      title: "Radii",
+    });
+
+    // Create a params object for the radii
+    const radiusParams = { ...config.radii };
+
+    // Add number inputs for each radius
+    (Object.keys(config.radii) as Array<keyof typeof config.radii>).forEach(
+      (key) => {
+        radiusFolder
+          .addBinding(radiusParams, key, {
+            min: 0.5,
+            max: 5,
+            step: 0.1,
+          })
+          .on("change", (ev) => {
+            onChange({
+              ...config,
+              radii: {
+                ...config.radii,
+                [key]: ev.value,
+              },
+            });
+          });
       }
     );
 

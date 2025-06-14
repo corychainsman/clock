@@ -4,12 +4,13 @@ import { Clock } from "./components/Clock";
 import { ClockControls } from "./components/ClockControls";
 import { useState } from "react";
 import type { ClockConfig } from "./types/clock";
-import { DEFAULT_COLORS } from "./types/clock";
+import { DEFAULT_COLORS, DEFAULT_RADII } from "./types/clock";
 import "./App.css";
 
 function App() {
   const [config, setConfig] = useState<ClockConfig>({
     colors: DEFAULT_COLORS,
+    radii: DEFAULT_RADII,
   });
 
   return (

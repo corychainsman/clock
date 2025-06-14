@@ -15,13 +15,7 @@ const ClockFace = ({ color }: { color: string }) => {
 };
 
 // Hour numbers component
-const HourNumbers = ({
-  radius = 3,
-  color,
-}: {
-  radius?: number;
-  color: string;
-}) => {
+const HourNumbers = ({ radius, color }: { radius: number; color: string }) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i + 1);
   return (
     <group>
@@ -49,10 +43,10 @@ const HourNumbers = ({
 
 // Minute numbers component
 const MinuteNumbers = ({
-  radius = 3.75,
+  radius,
   color,
 }: {
-  radius?: number;
+  radius: number;
   color: string;
 }) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i * 5);
@@ -81,13 +75,7 @@ const MinuteNumbers = ({
 };
 
 // Tick marks component
-const TickMarks = ({
-  radius = 4.25,
-  color,
-}: {
-  radius?: number;
-  color: string;
-}) => {
+const TickMarks = ({ radius, color }: { radius: number; color: string }) => {
   const ticks = Array.from({ length: 60 }, (_, i) => i);
   return (
     <group>
@@ -122,14 +110,14 @@ const TickMarks = ({
 
 // Clock hands component
 const ClockHands = ({
-  hourHandRadius = 2,
-  minuteHandRadius = 3,
-  secondHandRadius = 3.5,
+  hourHandRadius,
+  minuteHandRadius,
+  secondHandRadius,
   colors,
 }: {
-  hourHandRadius?: number;
-  minuteHandRadius?: number;
-  secondHandRadius?: number;
+  hourHandRadius: number;
+  minuteHandRadius: number;
+  secondHandRadius: number;
   colors: {
     hourHand: string;
     minuteHand: string;
@@ -191,10 +179,24 @@ export const Clock = ({ config }: ClockProps) => {
   return (
     <group position={[0, 0, 0]} scale={0.9}>
       <ClockFace color={config.colors.background} />
-      <TickMarks color={config.colors.numbers} />
-      <HourNumbers color={config.colors.numbers} />
-      <MinuteNumbers color={config.colors.numbers} />
-      <ClockHands colors={config.colors} />
+      <TickMarks
+        radius={config.radii.tickMarks}
+        color={config.colors.numbers}
+      />
+      <HourNumbers
+        radius={config.radii.hourNumbers}
+        color={config.colors.numbers}
+      />
+      <MinuteNumbers
+        radius={config.radii.minuteNumbers}
+        color={config.colors.numbers}
+      />
+      <ClockHands
+        hourHandRadius={config.radii.hourHand}
+        minuteHandRadius={config.radii.minuteHand}
+        secondHandRadius={config.radii.secondHand}
+        colors={config.colors}
+      />
     </group>
   );
 };
