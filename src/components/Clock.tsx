@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Text } from "@react-three/drei";
-import { ClockControls } from "./ClockControls";
 import type { ClockConfig } from "../types/clock";
-import { DEFAULT_COLORS } from "../types/clock";
 
 // Clock face component
 const ClockFace = ({ color }: { color: string }) => {
