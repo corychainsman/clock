@@ -1,5 +1,4 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 import { Clock } from "./components/Clock";
 import { ClockControls } from "./components/ClockControls";
 import { useState } from "react";
@@ -16,11 +15,10 @@ function App() {
   return (
     <div className="app">
       <ClockControls config={config} onChange={setConfig} />
-      <Canvas camera={{ position: [0, 0, 10], fov: 50 }}>
+      <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 90 }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <Clock config={config} />
-        <OrbitControls enableZoom={false} />
       </Canvas>
     </div>
   );
