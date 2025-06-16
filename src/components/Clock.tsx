@@ -29,7 +29,6 @@ const HourNumbers = ({ radius, color }: { radius: number; color: string }) => {
             color={color}
             anchorX="center"
             anchorY="middle"
-            font="/fonts/JetBrainsMono-Regular.ttf"
           >
             {num}
           </Text>
@@ -62,7 +61,6 @@ const MinuteNumbers = ({
             color={color}
             anchorX="center"
             anchorY="middle"
-            font="/fonts/JetBrainsMono-Regular.ttf"
           >
             {num.toString().padStart(2, "0")}
           </Text>
