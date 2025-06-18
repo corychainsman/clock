@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback } from "react";
 import { Pane } from "tweakpane";
 import type { ClockConfig } from "../types/clock";
-import { DEFAULT_COLORS, DEFAULT_RADII } from "../types/clock";
+import { DEFAULT_CONFIG } from "../types/clock";
 
 interface ClockControlsProps {
   config: ClockConfig;
@@ -11,22 +11,67 @@ interface ClockControlsProps {
 const updateURL = (newConfig: ClockConfig) => {
   const params = new URLSearchParams();
   
-  // Add color parameters (remove # from hex values) with 'color' prefix
-  Object.entries(newConfig.colors).forEach(([key, value]) => {
-    const defaultValue = DEFAULT_COLORS[key as keyof typeof DEFAULT_COLORS];
-    if (value !== defaultValue) {
-      params.set(`color${key.charAt(0).toUpperCase() + key.slice(1)}`, value.replace('#', ''));
+  const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
+  
+  // Add hand parameters
+  hands.forEach(handKey => {
+    const hand = newConfig[handKey];
+    const defaultHand = DEFAULT_CONFIG[handKey];
+    
+    // Hand color
+    if (hand.color !== defaultHand.color) {
+      params.set(`${handKey}Color`, hand.color.replace('#', ''));
+    }
+    
+    // Hand length
+    if (hand.length !== defaultHand.length) {
+      const roundedValue = Math.round(hand.length * 10) / 10;
+      params.set(`${handKey}Length`, roundedValue.toString());
+    }
+    
+    // Circle parameters
+    if (hand.circle.show !== defaultHand.circle.show) {
+      params.set(`${handKey}CircleShow`, hand.circle.show.toString());
+    }
+    
+    if (hand.circle.radius !== defaultHand.circle.radius) {
+      const roundedValue = Math.round(hand.circle.radius * 100) / 100;
+      params.set(`${handKey}CircleRadius`, roundedValue.toString());
+    }
+    
+    if (hand.circle.filled !== defaultHand.circle.filled) {
+      params.set(`${handKey}CircleFilled`, hand.circle.filled.toString());
+    }
+    
+    if (hand.circle.strokeWidth !== defaultHand.circle.strokeWidth) {
+      const roundedValue = Math.round(hand.circle.strokeWidth * 100) / 100;
+      params.set(`${handKey}CircleStrokeWidth`, roundedValue.toString());
     }
   });
   
-  // Add radius parameters with 'radius' prefix (rounded to 1 decimal place)
-  Object.entries(newConfig.radii).forEach(([key, value]) => {
-    const defaultValue = DEFAULT_RADII[key as keyof typeof DEFAULT_RADII];
-    if (value !== defaultValue) {
-      const roundedValue = Math.round(value * 10) / 10;
-      params.set(`radius${key.charAt(0).toUpperCase() + key.slice(1)}`, roundedValue.toString());
-    }
-  });
+  // Add face parameters
+  if (newConfig.face.background !== DEFAULT_CONFIG.face.background) {
+    params.set('faceBackground', newConfig.face.background.replace('#', ''));
+  }
+  
+  if (newConfig.face.numbers !== DEFAULT_CONFIG.face.numbers) {
+    params.set('faceNumbers', newConfig.face.numbers.replace('#', ''));
+  }
+  
+  if (newConfig.face.hourNumbers !== DEFAULT_CONFIG.face.hourNumbers) {
+    const roundedValue = Math.round(newConfig.face.hourNumbers * 10) / 10;
+    params.set('faceHourNumbers', roundedValue.toString());
+  }
+  
+  if (newConfig.face.minuteNumbers !== DEFAULT_CONFIG.face.minuteNumbers) {
+    const roundedValue = Math.round(newConfig.face.minuteNumbers * 10) / 10;
+    params.set('faceMinuteNumbers', roundedValue.toString());
+  }
+  
+  if (newConfig.face.tickMarks !== DEFAULT_CONFIG.face.tickMarks) {
+    const roundedValue = Math.round(newConfig.face.tickMarks * 10) / 10;
+    params.set('faceTickMarks', roundedValue.toString());
+  }
   
   const newURL = params.toString() 
     ? `${window.location.pathname}?${params.toString()}`
@@ -39,10 +84,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const paneRef = useRef<Pane | null>(null);
   const configRef = useRef(config);
-  const paramsRef = useRef<{ colors: ClockConfig['colors']; radii: ClockConfig['radii'] }>({
-    colors: { ...config.colors },
-    radii: { ...config.radii }
-  });
+  const paramsRef = useRef<ClockConfig>(JSON.parse(JSON.stringify(config)));
 
   // Keep config ref updated
   useEffect(() => {
@@ -56,11 +98,8 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
 
   // Initialize params ref with current config
   useEffect(() => {
-    paramsRef.current = {
-      colors: { ...config.colors },
-      radii: { ...config.radii }
-    };
-  }, [config.colors, config.radii]); // Update when config changes
+    paramsRef.current = JSON.parse(JSON.stringify(config));
+  }, [config]); // Update when config changes
 
   // Initialize pane once
   useEffect(() => {
@@ -72,55 +111,205 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
     });
     paneRef.current = pane;
 
-    // Add color controls
-    const colorFolder = pane.addFolder({
-      title: "Colors",
-    });
+    const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
+    const handLabels = ['Hour Hand', 'Minute Hand', 'Second Hand'];
 
-    // Add color pickers for each color
-    (Object.keys(paramsRef.current.colors) as Array<keyof typeof paramsRef.current.colors>).forEach(
-      (key) => {
-        colorFolder.addBinding(paramsRef.current.colors, key).on("change", (ev) => {
-          const newConfig = {
-            ...configRef.current,
-            colors: {
-              ...configRef.current.colors,
-              [key]: ev.value,
+    // Add controls for each hand
+    hands.forEach((handKey, index) => {
+      const handFolder = pane.addFolder({
+        title: handLabels[index] || handKey,
+      });
+
+      // Hand color
+      handFolder.addBinding(paramsRef.current[handKey], 'color', { label: 'Color' }).on("change", (ev) => {
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            color: ev.value,
+          },
+        };
+        handleConfigChange(newConfig);
+      });
+
+      // Hand length
+      handFolder.addBinding(paramsRef.current[handKey], 'length', {
+        label: 'Length',
+        min: 0.5,
+        max: 5,
+        step: 0.1,
+      }).on("change", (ev) => {
+        const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG[handKey].length;
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            length: value,
+          },
+        };
+        handleConfigChange(newConfig);
+      });
+
+      // Circle subgroup
+      const circleFolder = handFolder.addFolder({
+        title: 'Circle',
+      });
+
+      // Circle show/hide
+      circleFolder.addBinding(paramsRef.current[handKey].circle, 'show', { label: 'Show' }).on("change", (ev) => {
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            circle: {
+              ...configRef.current[handKey].circle,
+              show: ev.value,
             },
-          };
-          handleConfigChange(newConfig);
-        });
-      }
-    );
+          },
+        };
+        handleConfigChange(newConfig);
+      });
 
-    // Add radius controls
-    const radiusFolder = pane.addFolder({
-      title: "Radii",
+      // Circle radius
+      circleFolder.addBinding(paramsRef.current[handKey].circle, 'radius', {
+        label: 'Radius',
+        min: 0.01,
+        max: 0.5,
+        step: 0.01,
+      }).on("change", (ev) => {
+        const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG[handKey].circle.radius;
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            circle: {
+              ...configRef.current[handKey].circle,
+              radius: value,
+            },
+          },
+        };
+        handleConfigChange(newConfig);
+      });
+
+      // Circle filled
+      circleFolder.addBinding(paramsRef.current[handKey].circle, 'filled', { label: 'Filled' }).on("change", (ev) => {
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            circle: {
+              ...configRef.current[handKey].circle,
+              filled: ev.value,
+            },
+          },
+        };
+        handleConfigChange(newConfig);
+      });
+
+      // Circle stroke width
+      circleFolder.addBinding(paramsRef.current[handKey].circle, 'strokeWidth', {
+        label: 'Stroke Width',
+        min: 0.01,
+        max: 0.2,
+        step: 0.01,
+      }).on("change", (ev) => {
+        const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG[handKey].circle.strokeWidth;
+        const newConfig = {
+          ...configRef.current,
+          [handKey]: {
+            ...configRef.current[handKey],
+            circle: {
+              ...configRef.current[handKey].circle,
+              strokeWidth: value,
+            },
+          },
+        };
+        handleConfigChange(newConfig);
+      });
     });
 
-    // Add number inputs for each radius
-    (Object.keys(paramsRef.current.radii) as Array<keyof typeof paramsRef.current.radii>).forEach(
-      (key) => {
-        radiusFolder
-          .addBinding(paramsRef.current.radii, key, {
-            min: 0.5,
-            max: 5,
-            step: 0.1,
-          })
-          .on("change", (ev) => {
-            // Validate the value to prevent NaN
-            const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_RADII[key];
-            const newConfig = {
-              ...configRef.current,
-              radii: {
-                ...configRef.current.radii,
-                [key]: value,
-              },
-            };
-            handleConfigChange(newConfig);
-          });
-      }
-    );
+    // Add face controls
+    const faceFolder = pane.addFolder({
+      title: 'Clock Face',
+    });
+
+    // Face background color
+    faceFolder.addBinding(paramsRef.current.face, 'background', { label: 'Background' }).on("change", (ev) => {
+      const newConfig = {
+        ...configRef.current,
+        face: {
+          ...configRef.current.face,
+          background: ev.value,
+        },
+      };
+      handleConfigChange(newConfig);
+    });
+
+    // Face numbers color
+    faceFolder.addBinding(paramsRef.current.face, 'numbers', { label: 'Numbers' }).on("change", (ev) => {
+      const newConfig = {
+        ...configRef.current,
+        face: {
+          ...configRef.current.face,
+          numbers: ev.value,
+        },
+      };
+      handleConfigChange(newConfig);
+    });
+
+    // Hour numbers radius
+    faceFolder.addBinding(paramsRef.current.face, 'hourNumbers', {
+      label: 'Hour Numbers Radius',
+      min: 0.5,
+      max: 5,
+      step: 0.1,
+    }).on("change", (ev) => {
+      const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG.face.hourNumbers;
+      const newConfig = {
+        ...configRef.current,
+        face: {
+          ...configRef.current.face,
+          hourNumbers: value,
+        },
+      };
+      handleConfigChange(newConfig);
+    });
+
+    // Minute numbers radius
+    faceFolder.addBinding(paramsRef.current.face, 'minuteNumbers', {
+      label: 'Minute Numbers Radius',
+      min: 0.5,
+      max: 5,
+      step: 0.1,
+    }).on("change", (ev) => {
+      const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG.face.minuteNumbers;
+      const newConfig = {
+        ...configRef.current,
+        face: {
+          ...configRef.current.face,
+          minuteNumbers: value,
+        },
+      };
+      handleConfigChange(newConfig);
+    });
+
+    // Tick marks radius
+    faceFolder.addBinding(paramsRef.current.face, 'tickMarks', {
+      label: 'Tick Marks Radius',
+      min: 0.5,
+      max: 5,
+      step: 0.1,
+    }).on("change", (ev) => {
+      const value = typeof ev.value === 'number' && !isNaN(ev.value) ? ev.value : DEFAULT_CONFIG.face.tickMarks;
+      const newConfig = {
+        ...configRef.current,
+        face: {
+          ...configRef.current.face,
+          tickMarks: value,
+        },
+      };
+      handleConfigChange(newConfig);
+    });
 
   }, [handleConfigChange]); // Only initialize once
 
@@ -129,15 +318,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
     if (!paneRef.current) return;
 
     // Update params to match current config
-    Object.keys(paramsRef.current.colors).forEach(key => {
-      const typedKey = key as keyof typeof paramsRef.current.colors;
-      paramsRef.current.colors[typedKey] = config.colors[typedKey];
-    });
-
-    Object.keys(paramsRef.current.radii).forEach(key => {
-      const typedKey = key as keyof typeof paramsRef.current.radii;
-      paramsRef.current.radii[typedKey] = config.radii[typedKey];
-    });
+    paramsRef.current = JSON.parse(JSON.stringify(config));
 
     // Refresh the pane to show updated values
     paneRef.current.refresh();
