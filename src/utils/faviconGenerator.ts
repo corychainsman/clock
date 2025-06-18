@@ -56,7 +56,7 @@ export const generateFavicon = (config: ClockConfig): string => {
   // Draw hour hand
   const hourLength = clockRadius * (config.hourHand.length / 5); // Scale to fit
   ctx.strokeStyle = config.hourHand.color;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
   ctx.lineTo(
@@ -87,7 +87,7 @@ export const generateFavicon = (config: ClockConfig): string => {
   // Draw minute hand
   const minuteLength = clockRadius * (config.minuteHand.length / 5); // Scale to fit
   ctx.strokeStyle = config.minuteHand.color;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
   ctx.lineTo(
@@ -118,7 +118,7 @@ export const generateFavicon = (config: ClockConfig): string => {
   // Draw second hand
   const secondLength = clockRadius * (config.secondHand.length / 5); // Scale to fit
   ctx.strokeStyle = config.secondHand.color;
-  ctx.lineWidth = 1;
+  ctx.lineWidth = 2.5;
   ctx.beginPath();
   ctx.moveTo(centerX, centerY);
   ctx.lineTo(
