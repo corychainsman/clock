@@ -172,25 +172,35 @@ interface ClockProps {
 }
 
 export const Clock = ({ config }: ClockProps) => {
+  // Validate radius values to prevent NaN errors
+  const safeRadii = {
+    tickMarks: isNaN(config.radii.tickMarks) ? 4.25 : config.radii.tickMarks,
+    hourNumbers: isNaN(config.radii.hourNumbers) ? 3 : config.radii.hourNumbers,
+    minuteNumbers: isNaN(config.radii.minuteNumbers) ? 3.75 : config.radii.minuteNumbers,
+    hourHand: isNaN(config.radii.hourHand) ? 2 : config.radii.hourHand,
+    minuteHand: isNaN(config.radii.minuteHand) ? 3 : config.radii.minuteHand,
+    secondHand: isNaN(config.radii.secondHand) ? 3.5 : config.radii.secondHand,
+  };
+
   return (
     <group position={[0, 0, 0]} scale={0.9}>
       <ClockFace color={config.colors.background} />
       <TickMarks
-        radius={config.radii.tickMarks}
+        radius={safeRadii.tickMarks}
         color={config.colors.numbers}
       />
       <HourNumbers
-        radius={config.radii.hourNumbers}
+        radius={safeRadii.hourNumbers}
         color={config.colors.numbers}
       />
       <MinuteNumbers
-        radius={config.radii.minuteNumbers}
+        radius={safeRadii.minuteNumbers}
         color={config.colors.numbers}
       />
       <ClockHands
-        hourHandRadius={config.radii.hourHand}
-        minuteHandRadius={config.radii.minuteHand}
-        secondHandRadius={config.radii.secondHand}
+        hourHandRadius={safeRadii.hourHand}
+        minuteHandRadius={safeRadii.minuteHand}
+        secondHandRadius={safeRadii.secondHand}
         colors={config.colors}
       />
     </group>
