@@ -1,54 +1,100 @@
-# React + TypeScript + Vite
+# 🕒 3D Analog Clock
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A beautiful, interactive 3D analog clock built with React and Three.js. Customize colors, sizes, and watch time tick by in real-time with a dynamic favicon that mirrors your clock settings!
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **3D Rendered Clock**: Built with React Three Fiber for smooth 3D graphics
+- **Real-time Updates**: Clock hands move continuously to show the current time
+- **Interactive Controls**: Customize colors and sizes with an intuitive control panel
+- **Dynamic Favicon**: The browser tab icon shows a mini version of your customized clock
+- **URL Configuration**: Share your clock settings with others via URL parameters
+- **Responsive Design**: Works great on desktop and mobile devices
 
-## Expanding the ESLint configuration
+## 🚀 Live Demo
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Check out the live version: [https://corychainsman.github.io/clock/](https://corychainsman.github.io/clock/)
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 🎨 Customization
+
+Use the control panel on the right to customize:
+
+- **Clock Hands**: Change colors and lengths for hour, minute, and second hands
+- **Hand Circles**: Add decorative circles at the end of hands with customizable size and style
+- **Clock Face**: Modify background color and number styling
+- **Radii Settings**: Adjust the positioning of numbers and tick marks
+
+## 🔗 URL Sharing
+
+Your customizations are automatically saved to the URL! Share your custom clock design by copying the URL from your browser's address bar.
+
+Example: `?hourHandColor=ff0000&minuteHandColor=00ff00&secondHandColor=0000ff`
+
+## 🛠️ Development
+
+Want to run this locally or contribute? Here's how:
+
+### Prerequisites
+
+- Node.js (v16 or higher)
+- npm or yarn
+
+### Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/corychainsman/clock.git
+cd clock
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Available Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build locally
+- `npm run lint` - Run ESLint to check code quality
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+## 🏗️ Built With
+
+- **React** - UI framework
+- **TypeScript** - Type safety
+- **Three.js** - 3D graphics via React Three Fiber
+- **Vite** - Build tool and dev server
+- **Tweakpane** - Interactive control panel
+
+## 🎯 Technical Details
+
+The clock uses an orthographic camera for a clean 2D appearance while leveraging 3D positioning for smooth animations. All clock elements are rendered using Three.js geometries:
+
+- Clock face: CircleGeometry with customizable background
+- Clock hands: BoxGeometry with real-time rotation based on current time
+- Numbers and tick marks: Positioned using polar coordinates
+- Dynamic favicon: Canvas-based rendering that updates every second
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to:
+
+- Report bugs by opening an issue
+- Suggest new features
+- Submit pull requests
+
+## 📝 License
+
+This project is open source and available under the MIT License.
+
+## 🙏 Acknowledgments
+
+- Favicon generation inspired by canvas-based rendering techniques
+- GitHub corner by [Tim Holman](https://github.com/tholman/github-corners)
+- Built with the amazing React Three Fiber ecosystem
+
+---
+
+*Made with ❤️ and Three.js*
