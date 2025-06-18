@@ -1,9 +1,10 @@
 import { Canvas } from "@react-three/fiber";
 import { Clock } from "./components/Clock";
 import { ClockControls } from "./components/ClockControls";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ClockConfig } from "./types/clock";
 import { DEFAULT_CONFIG } from "./types/clock";
+import { updateFavicon } from "./utils/faviconGenerator";
 import "./App.css";
 
 const getConfigFromURL = (): ClockConfig => {
@@ -102,6 +103,19 @@ function App() {
     // Initialize with URL parameters if available
     return getConfigFromURL();
   });
+
+  // Update favicon every second with current config and time
+  useEffect(() => {
+    // Initial favicon update
+    updateFavicon(config);
+    
+    // Set up interval to update favicon every second
+    const faviconInterval = setInterval(() => {
+      updateFavicon(config);
+    }, 1000);
+    
+    return () => clearInterval(faviconInterval);
+  }, [config]);
 
   return (
     <div className="app">
