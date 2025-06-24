@@ -3,7 +3,7 @@ import { useThree } from '@react-three/fiber';
 
 export const useResponsiveCamera = () => {
   const { camera, size } = useThree();
-  const [zoom, setZoom] = useState(90);
+  const [zoom, setZoom] = useState(95);
 
   useEffect(() => {
     const calculateZoom = () => {
@@ -11,7 +11,7 @@ export const useResponsiveCamera = () => {
       const clockSize = 10;
       
       // Use 90% of the smaller viewport dimension
-      const targetSize = Math.min(size.width, size.height) * 0.9;
+      const targetSize = Math.min(size.width, size.height) * 0.95;
       
       // Calculate zoom to fit clock bounds within target size
       const newZoom = targetSize / clockSize;
