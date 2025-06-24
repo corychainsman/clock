@@ -155,7 +155,7 @@ function App() {
         </svg>
       </a>
       <ClockControls config={config} onChange={setConfig} />
-      <Canvas orthographic camera={{ position: [0, 0, 10], zoom: 90 }}>
+      <Canvas orthographic camera={{ position: [0, 0, 10] }}>
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} />
         <Clock config={config} />

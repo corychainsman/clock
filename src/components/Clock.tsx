@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Text } from "@react-three/drei";
 import type { ClockConfig } from "../types/clock";
+import { useResponsiveCamera } from "../hooks/useResponsiveCamera";
 
 // Clock face component
 const ClockFace = ({ color }: { color: string }) => {
@@ -211,6 +212,9 @@ interface ClockProps {
 }
 
 export const Clock = ({ config }: ClockProps) => {
+  // Use responsive camera hook
+  useResponsiveCamera();
+
   // Validate face values to prevent NaN errors
   const safeFace = {
     tickMarks: isNaN(config.face.tickMarks) ? 4.25 : config.face.tickMarks,
