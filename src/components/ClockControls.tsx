@@ -8,77 +8,77 @@ interface ClockControlsProps {
   onChange: (newConfig: ClockConfig) => void;
 }
 
-const updateURL = (newConfig: ClockConfig) => {
-  const params = new URLSearchParams();
+// const updateURL = (newConfig: ClockConfig) => {
+//   const params = new URLSearchParams();
 
-  const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
+//   const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
 
-  // Add hand parameters
-  hands.forEach(handKey => {
-    const hand = newConfig[handKey];
-    const defaultHand = DEFAULT_CONFIG[handKey];
+//   // Add hand parameters
+//   hands.forEach(handKey => {
+//     const hand = newConfig[handKey];
+//     const defaultHand = DEFAULT_CONFIG[handKey];
 
-    // Hand color
-    if (hand.color !== defaultHand.color) {
-      params.set(`${handKey}Color`, hand.color.replace('#', ''));
-    }
+//     // Hand color
+//     if (hand.color !== defaultHand.color) {
+//       params.set(`${handKey}Color`, hand.color.replace('#', ''));
+//     }
 
-    // Hand length
-    if (hand.length !== defaultHand.length) {
-      const roundedValue = Math.round(hand.length * 10) / 10;
-      params.set(`${handKey}Length`, roundedValue.toString());
-    }
+//     // Hand length
+//     if (hand.length !== defaultHand.length) {
+//       const roundedValue = Math.round(hand.length * 10) / 10;
+//       params.set(`${handKey}Length`, roundedValue.toString());
+//     }
 
-    // Circle parameters
-    if (hand.circle.show !== defaultHand.circle.show) {
-      params.set(`${handKey}CircleShow`, hand.circle.show.toString());
-    }
+//     // Circle parameters
+//     if (hand.circle.show !== defaultHand.circle.show) {
+//       params.set(`${handKey}CircleShow`, hand.circle.show.toString());
+//     }
 
-    if (hand.circle.radius !== defaultHand.circle.radius) {
-      const roundedValue = Math.round(hand.circle.radius * 100) / 100;
-      params.set(`${handKey}CircleRadius`, roundedValue.toString());
-    }
+//     if (hand.circle.radius !== defaultHand.circle.radius) {
+//       const roundedValue = Math.round(hand.circle.radius * 100) / 100;
+//       params.set(`${handKey}CircleRadius`, roundedValue.toString());
+//     }
 
-    if (hand.circle.filled !== defaultHand.circle.filled) {
-      params.set(`${handKey}CircleFilled`, hand.circle.filled.toString());
-    }
+//     if (hand.circle.filled !== defaultHand.circle.filled) {
+//       params.set(`${handKey}CircleFilled`, hand.circle.filled.toString());
+//     }
 
-    if (hand.circle.strokeWidth !== defaultHand.circle.strokeWidth) {
-      const roundedValue = Math.round(hand.circle.strokeWidth * 100) / 100;
-      params.set(`${handKey}CircleStrokeWidth`, roundedValue.toString());
-    }
-  });
+//     if (hand.circle.strokeWidth !== defaultHand.circle.strokeWidth) {
+//       const roundedValue = Math.round(hand.circle.strokeWidth * 100) / 100;
+//       params.set(`${handKey}CircleStrokeWidth`, roundedValue.toString());
+//     }
+//   });
 
-  // Add face parameters
-  if (newConfig.face.background !== DEFAULT_CONFIG.face.background) {
-    params.set('faceBackground', newConfig.face.background.replace('#', ''));
-  }
+//   // Add face parameters
+//   if (newConfig.face.background !== DEFAULT_CONFIG.face.background) {
+//     params.set('faceBackground', newConfig.face.background.replace('#', ''));
+//   }
 
-  if (newConfig.face.numbers !== DEFAULT_CONFIG.face.numbers) {
-    params.set('faceNumbers', newConfig.face.numbers.replace('#', ''));
-  }
+//   if (newConfig.face.numbers !== DEFAULT_CONFIG.face.numbers) {
+//     params.set('faceNumbers', newConfig.face.numbers.replace('#', ''));
+//   }
 
-  if (newConfig.face.hourNumbers !== DEFAULT_CONFIG.face.hourNumbers) {
-    const roundedValue = Math.round(newConfig.face.hourNumbers * 10) / 10;
-    params.set('faceHourNumbers', roundedValue.toString());
-  }
+//   if (newConfig.face.hourNumbers !== DEFAULT_CONFIG.face.hourNumbers) {
+//     const roundedValue = Math.round(newConfig.face.hourNumbers * 10) / 10;
+//     params.set('faceHourNumbers', roundedValue.toString());
+//   }
 
-  if (newConfig.face.minuteNumbers !== DEFAULT_CONFIG.face.minuteNumbers) {
-    const roundedValue = Math.round(newConfig.face.minuteNumbers * 10) / 10;
-    params.set('faceMinuteNumbers', roundedValue.toString());
-  }
+//   if (newConfig.face.minuteNumbers !== DEFAULT_CONFIG.face.minuteNumbers) {
+//     const roundedValue = Math.round(newConfig.face.minuteNumbers * 10) / 10;
+//     params.set('faceMinuteNumbers', roundedValue.toString());
+//   }
 
-  if (newConfig.face.tickMarks !== DEFAULT_CONFIG.face.tickMarks) {
-    const roundedValue = Math.round(newConfig.face.tickMarks * 10) / 10;
-    params.set('faceTickMarks', roundedValue.toString());
-  }
+//   if (newConfig.face.tickMarks !== DEFAULT_CONFIG.face.tickMarks) {
+//     const roundedValue = Math.round(newConfig.face.tickMarks * 10) / 10;
+//     params.set('faceTickMarks', roundedValue.toString());
+//   }
 
-  const newURL = params.toString()
-    ? `${window.location.pathname}?${params.toString()}`
-    : window.location.pathname;
+//   const newURL = params.toString()
+//     ? `${window.location.pathname}?${params.toString()}`
+//     : window.location.pathname;
 
-  window.history.replaceState({}, '', newURL);
-};
+//   window.history.replaceState({}, '', newURL);
+// };
 
 export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
