@@ -317,7 +317,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
 
     // Add Share button
     pane.addButton({
-      title: 'Share',
+      title: 'Share Config',
     }).on('click', () => {
       const params = new URLSearchParams();
 
