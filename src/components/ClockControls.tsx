@@ -114,8 +114,13 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
     const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
     const handLabels = ['Hour Hand', 'Minute Hand', 'Second Hand'];
 
+    // Create main parameters folder
+    const parametersFolder = pane.addFolder({
+      title: 'Parameters',
+    });
+
     // Add face controls
-    const faceFolder = pane.addFolder({
+    const faceFolder = parametersFolder.addFolder({
       title: 'Clock Face',
     });
 
@@ -199,7 +204,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
 
     // Add controls for each hand
     hands.forEach((handKey, index) => {
-      const handFolder = pane.addFolder({
+      const handFolder = parametersFolder.addFolder({
         title: handLabels[index] || handKey,
       });
 
