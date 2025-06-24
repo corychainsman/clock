@@ -93,7 +93,6 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
 
   const handleConfigChange = useCallback((newConfig: ClockConfig) => {
     onChange(newConfig);
-    updateURL(newConfig);
   }, [onChange]);
 
   // Initialize params ref with current config
@@ -313,6 +312,86 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
           },
         };
         handleConfigChange(newConfig);
+      });
+    });
+
+    // Add Share button
+    pane.addButton({
+      title: 'Share',
+    }).on('click', () => {
+      const params = new URLSearchParams();
+
+      const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
+
+      // Add hand parameters
+      hands.forEach(handKey => {
+        const hand = configRef.current[handKey];
+        const defaultHand = DEFAULT_CONFIG[handKey];
+
+        // Hand color
+        if (hand.color !== defaultHand.color) {
+          params.set(`${handKey}Color`, hand.color.replace('#', ''));
+        }
+
+        // Hand length
+        if (hand.length !== defaultHand.length) {
+          const roundedValue = Math.round(hand.length * 10) / 10;
+          params.set(`${handKey}Length`, roundedValue.toString());
+        }
+
+        // Circle parameters
+        if (hand.circle.show !== defaultHand.circle.show) {
+          params.set(`${handKey}CircleShow`, hand.circle.show.toString());
+        }
+
+        if (hand.circle.radius !== defaultHand.circle.radius) {
+          const roundedValue = Math.round(hand.circle.radius * 100) / 100;
+          params.set(`${handKey}CircleRadius`, roundedValue.toString());
+        }
+
+        if (hand.circle.filled !== defaultHand.circle.filled) {
+          params.set(`${handKey}CircleFilled`, hand.circle.filled.toString());
+        }
+
+        if (hand.circle.strokeWidth !== defaultHand.circle.strokeWidth) {
+          const roundedValue = Math.round(hand.circle.strokeWidth * 100) / 100;
+          params.set(`${handKey}CircleStrokeWidth`, roundedValue.toString());
+        }
+      });
+
+      // Add face parameters
+      if (configRef.current.face.background !== DEFAULT_CONFIG.face.background) {
+        params.set('faceBackground', configRef.current.face.background.replace('#', ''));
+      }
+
+      if (configRef.current.face.numbers !== DEFAULT_CONFIG.face.numbers) {
+        params.set('faceNumbers', configRef.current.face.numbers.replace('#', ''));
+      }
+
+      if (configRef.current.face.hourNumbers !== DEFAULT_CONFIG.face.hourNumbers) {
+        const roundedValue = Math.round(configRef.current.face.hourNumbers * 10) / 10;
+        params.set('faceHourNumbers', roundedValue.toString());
+      }
+
+      if (configRef.current.face.minuteNumbers !== DEFAULT_CONFIG.face.minuteNumbers) {
+        const roundedValue = Math.round(configRef.current.face.minuteNumbers * 10) / 10;
+        params.set('faceMinuteNumbers', roundedValue.toString());
+      }
+
+      if (configRef.current.face.tickMarks !== DEFAULT_CONFIG.face.tickMarks) {
+        const roundedValue = Math.round(configRef.current.face.tickMarks * 10) / 10;
+        params.set('faceTickMarks', roundedValue.toString());
+      }
+
+      const shareURL = params.toString()
+        ? `${window.location.origin}${window.location.pathname}?${params.toString()}`
+        : `${window.location.origin}${window.location.pathname}`;
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(shareURL).then(() => {
+        alert(`URL copied to clipboard: ${shareURL}`);
+      }).catch(() => {
+        alert(`Share URL: ${shareURL}`);
       });
     });
 
