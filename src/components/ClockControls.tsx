@@ -49,6 +49,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
     // Add face controls
     const faceFolder = parametersFolder.addFolder({
       title: 'Clock Face',
+      expanded: false
     });
 
     // Face background color
@@ -133,6 +134,7 @@ export const ClockControls = ({ config, onChange }: ClockControlsProps) => {
     hands.forEach((handKey, index) => {
       const handFolder = parametersFolder.addFolder({
         title: handLabels[index] || handKey,
+        expanded: false
       });
 
       // Hand color
