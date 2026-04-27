@@ -14,7 +14,7 @@ const ClockFace = ({ color }: { color: string }) => {
 };
 
 // Hour numbers component
-const HourNumbers = ({ radius, color }: { radius: number; color: string }) => {
+const HourNumbers = ({ radius, color, font }: { radius: number; color: string; font: string }) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i + 1);
   return (
     <group>
@@ -27,6 +27,7 @@ const HourNumbers = ({ radius, color }: { radius: number; color: string }) => {
             key={num}
             position={[x, y, 0.1]}
             fontSize={0.5}
+            font={font}
             color={color}
             anchorX="center"
             anchorY="middle"
@@ -43,9 +44,11 @@ const HourNumbers = ({ radius, color }: { radius: number; color: string }) => {
 const MinuteNumbers = ({
   radius,
   color,
+  font,
 }: {
   radius: number;
   color: string;
+  font: string;
 }) => {
   const numbers = Array.from({ length: 12 }, (_, i) => i * 5);
   return (
@@ -59,6 +62,7 @@ const MinuteNumbers = ({
             key={num}
             position={[x, y, 0.1]}
             fontSize={0.3}
+            font={font}
             color={color}
             anchorX="center"
             anchorY="middle"
@@ -209,9 +213,10 @@ const ClockHands = ({
 // Main Clock component
 interface ClockProps {
   config: ClockConfig;
+  fontUrl: string;
 }
 
-export const Clock = ({ config }: ClockProps) => {
+export const Clock = ({ config, fontUrl }: ClockProps) => {
   // Use responsive camera hook
   useResponsiveCamera();
 
@@ -248,10 +253,12 @@ export const Clock = ({ config }: ClockProps) => {
       <HourNumbers
         radius={safeFace.hourNumbers}
         color={config.face.numbers}
+        font={fontUrl}
       />
       <MinuteNumbers
         radius={safeFace.minuteNumbers}
         color={config.face.numbers}
+        font={fontUrl}
       />
       <ClockHands
         hourHand={safeHands.hourHand}

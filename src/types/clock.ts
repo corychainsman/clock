@@ -20,11 +20,30 @@ export interface ClockFace {
 }
 
 export interface ClockConfig {
+  preset?: string;
   hourHand: ClockHand;
   minuteHand: ClockHand;
   secondHand: ClockHand;
   face: ClockFace;
 }
+
+export interface PrintSettings {
+  diameterMm: number;
+  centerHoleMm: number;
+  baseThicknessMm: number;
+  markingHeightMm: number;
+  layerHeightMm: number;
+  nozzleDiameterMm: number;
+}
+
+export const DEFAULT_PRINT_SETTINGS: PrintSettings = {
+  diameterMm: 200,
+  centerHoleMm: 8.2,
+  baseThicknessMm: 2.4,
+  markingHeightMm: 0.6,
+  layerHeightMm: 0.2,
+  nozzleDiameterMm: 0.4,
+};
 
 export const DEFAULT_CONFIG: ClockConfig = {
   face: {

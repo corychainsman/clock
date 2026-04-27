@@ -1,10 +1,12 @@
 import { Canvas } from "@react-three/fiber";
 import { Clock } from "./components/Clock";
 import { ClockControls } from "./components/ClockControls";
-import { useState, useEffect } from "react";
-import type { ClockConfig } from "./types/clock";
-import { DEFAULT_CONFIG } from "./types/clock";
+import { PrintPreview } from "./components/PrintPreview";
+import { useState, useEffect, useCallback } from "react";
+import type { ClockConfig, PrintSettings } from "./types/clock";
+import { DEFAULT_CONFIG, DEFAULT_PRINT_SETTINGS } from "./types/clock";
 import { updateFavicon } from "./utils/faviconGenerator";
+import { downloadBlob, exportPrintModelZip, PRINT_FONT_URL } from "./utils/printModel";
 import "./App.css";
 
 const getConfigFromURL = (): ClockConfig => {
@@ -98,11 +100,40 @@ const getConfigFromURL = (): ClockConfig => {
   return config;
 };
 
+const getPrintSettingsFromURL = (): PrintSettings => {
+  const params = new URLSearchParams(window.location.search);
+  const settings: PrintSettings = { ...DEFAULT_PRINT_SETTINGS };
+  const numericParams: Array<[keyof PrintSettings, string, number, number]> = [
+    ["diameterMm", "printDiameterMm", 50, 500],
+    ["centerHoleMm", "printCenterHoleMm", 0, 60],
+    ["baseThicknessMm", "printBaseThicknessMm", 0.4, 10],
+    ["markingHeightMm", "printMarkingHeightMm", 0.1, 5],
+    ["layerHeightMm", "printLayerHeightMm", 0.05, 1],
+    ["nozzleDiameterMm", "printNozzleDiameterMm", 0.1, 2],
+  ];
+
+  numericParams.forEach(([key, param, min, max]) => {
+    const value = params.get(param);
+    if (!value) return;
+    const parsed = parseFloat(value);
+    if (!isNaN(parsed) && parsed >= min && parsed <= max) {
+      settings[key] = parsed;
+    }
+  });
+
+  return settings;
+};
+
 function App() {
   const [config, setConfig] = useState<ClockConfig>(() => {
     // Initialize with URL parameters if available
     return getConfigFromURL();
   });
+  const [printSettings, setPrintSettings] = useState<PrintSettings>(() => getPrintSettingsFromURL());
+  const [previewMode, setPreviewMode] = useState<"clock" | "print">("clock");
+  const [explodeMm, setExplodeMm] = useState(0);
+  const [printWarnings, setPrintWarnings] = useState<string[]>([]);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Update favicon every second with current config and time
   useEffect(() => {
@@ -116,6 +147,16 @@ function App() {
     
     return () => clearInterval(faviconInterval);
   }, [config]);
+
+  const handleExportSTL = useCallback(async () => {
+    setIsExporting(true);
+    try {
+      const blob = await exportPrintModelZip(config, printSettings);
+      downloadBlob(blob, "clock-face-stl.zip");
+    } finally {
+      setIsExporting(false);
+    }
+  }, [config, printSettings]);
 
   return (
     <div className="app">
@@ -154,11 +195,40 @@ function App() {
           />
         </svg>
       </a>
-      <ClockControls config={config} onChange={setConfig} />
-      <Canvas orthographic camera={{ position: [0, 0, 10] }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <Clock config={config} />
+      <ClockControls
+        config={config}
+        onChange={setConfig}
+        printSettings={printSettings}
+        onPrintSettingsChange={setPrintSettings}
+        previewMode={previewMode}
+        onPreviewModeChange={setPreviewMode}
+        explodeMm={explodeMm}
+        onExplodeMmChange={setExplodeMm}
+        printWarnings={printWarnings}
+        isExporting={isExporting}
+        onExportSTL={handleExportSTL}
+      />
+      <Canvas
+        orthographic
+        camera={{
+          position: previewMode === "print" ? [0, -4, 8] : [0, 0, 10],
+          zoom: previewMode === "print" ? 70 : undefined,
+        }}
+      >
+        {previewMode === "print" ? (
+          <PrintPreview
+            config={config}
+            settings={printSettings}
+            explodeMm={explodeMm}
+            onWarningsChange={setPrintWarnings}
+          />
+        ) : (
+          <>
+            <ambientLight intensity={0.5} />
+            <pointLight position={[10, 10, 10]} />
+            <Clock config={config} fontUrl={PRINT_FONT_URL} />
+          </>
+        )}
       </Canvas>
     </div>
   );
