@@ -63,6 +63,39 @@ canvas {
   padding: 0;
 }
 
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) {
+  width: 40px;
+}
+
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) > .tp-rotv_b {
+  width: 40px;
+  padding-left: 0;
+  padding-right: 0;
+  display: grid;
+  place-items: center;
+}
+
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) > .tp-rotv_b > .tp-rotv_t {
+  display: var(--collapsed-pane-title-display, none);
+}
+
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) > .tp-rotv_b > .tp-rotv_m {
+  position: static;
+  margin: 0;
+}
+
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) > .tp-rotv_i,
+.tp-rotv:has(> .tp-rotv_c[style*="height: 0px"]) > .tp-rotv_c {
+  display: none;
+}
+
+.tp-rotv > .tp-rotv_c,
+.tp-rotv > .tp-rotv_i,
+.tp-rotv > .tp-rotv_b {
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
 .github-corner:hover .octo-arm {
   animation: octocat-wave 560ms ease-in-out;
 }

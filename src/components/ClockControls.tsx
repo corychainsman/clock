@@ -207,6 +207,8 @@ export const ClockControls = ({
     // Create pane with updated config
     const pane = new Pane({
       container: containerRef.current,
+      title: "Clock Controls",
+      expanded: true,
     });
     paneRef.current = pane;
 
@@ -566,6 +568,7 @@ export const ClockControls = ({
         top: "20px",
         right: "20px",
         zIndex: 1000,
+        ["--collapsed-pane-title-display" as string]: "none",
       }}
     />
   );

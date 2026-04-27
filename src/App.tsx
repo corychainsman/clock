@@ -1,6 +1,7 @@
 import { Canvas } from "@react-three/fiber";
 import { Clock } from "./components/Clock";
 import { ClockControls } from "./components/ClockControls";
+import { PreviewCameraReset } from "./components/PreviewCameraReset";
 import { PrintPreview } from "./components/PrintPreview";
 import { useState, useEffect, useCallback } from "react";
 import type { ClockConfig, PrintSettings } from "./types/clock";
@@ -215,6 +216,7 @@ function App() {
           zoom: previewMode === "print" ? 70 : undefined,
         }}
       >
+        <PreviewCameraReset previewMode={previewMode} />
         {previewMode === "print" ? (
           <PrintPreview
             config={config}
