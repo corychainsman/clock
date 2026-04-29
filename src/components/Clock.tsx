@@ -110,12 +110,17 @@ const TickMarks = ({ radius, color }: { radius: number; color: string }) => {
   );
 };
 
+// Z-depth of the extruded hand body. Constant — invisible under the orthographic
+// camera, and the STL exporter doesn't extrude hands, so this is purely a
+// rendering detail.
+const HAND_EXTRUDE_DEPTH = 0.1;
+
 // Build the 2D shape (with optional slot hole) for a hand
 const buildHandShape = (hand: ClockHand): Shape => {
   const shape = new Shape();
   const length = Math.max(hand.length, 0.01);
-  const baseWidth = Math.max(hand.width * hand.endCap.baseScale, 0.001);
-  const tipWidth = Math.max(hand.width * hand.endCap.tipScale, 0.001);
+  const baseWidth = Math.max(hand.thickness * hand.endCap.baseScale, 0.001);
+  const tipWidth = Math.max(hand.thickness * hand.endCap.tipScale, 0.001);
 
   // Outer outline, traced counter-clockwise so the front face normal points +Z.
   shape.moveTo(baseWidth / 2, 0);
@@ -173,7 +178,7 @@ const Hand = ({ hand, angle }: { hand: ClockHand; angle: number }) => {
   const geometry = useMemo(() => {
     const shape = buildHandShape(hand);
     return new ExtrudeGeometry(shape, {
-      depth: Math.max(0.001, hand.depth),
+      depth: HAND_EXTRUDE_DEPTH,
       bevelEnabled: false,
       curveSegments: 24,
     });
@@ -182,8 +187,7 @@ const Hand = ({ hand, angle }: { hand: ClockHand; angle: number }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     hand.length,
-    hand.width,
-    hand.depth,
+    hand.thickness,
     hand.endCap.shape,
     hand.endCap.tipRadius,
     hand.endCap.tipAngle,
@@ -199,8 +203,8 @@ const Hand = ({ hand, angle }: { hand: ClockHand; angle: number }) => {
 
   if (!hand.show) return null;
 
-  // The body is extruded from z=0 to z=depth. Place caps just above the front face.
-  const capZ = hand.depth + 0.01;
+  // The body is extruded from z=0 to z=HAND_EXTRUDE_DEPTH. Place caps just above the front face.
+  const capZ = HAND_EXTRUDE_DEPTH + 0.01;
   const tipCircle = hand.circle;
   const center = hand.centerCircle;
   const centerColor = center.color || hand.color;

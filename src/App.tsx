@@ -54,11 +54,8 @@ const getConfigFromURL = (): ClockConfig => {
     const lengthValue = parseNumberInRange(params.get(`${handKey}Length`), 0.1, 10);
     if (lengthValue !== undefined) hand.length = lengthValue;
 
-    const widthValue = parseNumberInRange(params.get(`${handKey}Width`), 0.005, 1);
-    if (widthValue !== undefined) hand.width = widthValue;
-
-    const depthValue = parseNumberInRange(params.get(`${handKey}Depth`), 0.005, 1);
-    if (depthValue !== undefined) hand.depth = depthValue;
+    const thicknessValue = parseNumberInRange(params.get(`${handKey}Thickness`), 0.005, 1);
+    if (thicknessValue !== undefined) hand.thickness = thicknessValue;
 
     // Tip circle
     const circleShow = parseBool(params.get(`${handKey}CircleShow`));

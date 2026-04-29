@@ -24,18 +24,17 @@ const center = (color: string, radius: number, show = false): HandCenterCircle =
   color,
 });
 
-type LegacyHand = Omit<ClockHand, 'show' | 'width' | 'depth' | 'centerCircle' | 'endCap'>;
+type LegacyHand = Omit<ClockHand, 'show' | 'thickness' | 'centerCircle' | 'endCap'>;
 
 const hand = (
   legacy: LegacyHand,
-  width: number,
+  thickness: number,
   centerCircle: HandCenterCircle,
   overrides: Partial<ClockHand> = {}
 ): ClockHand => ({
   ...legacy,
   show: true,
-  width,
-  depth: width,
+  thickness,
   centerCircle,
   endCap: flatEndCap(),
   ...overrides,

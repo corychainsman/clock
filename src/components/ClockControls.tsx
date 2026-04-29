@@ -388,12 +388,9 @@ export const ClockControls = ({
       bindNumber(handFolder, paramsRef.current[handKey], 'length',
         { label: 'Length', min: 0.5, max: 5, step: 0.1 },
         `${handKey}.length`, handDefaults.length);
-      bindNumber(handFolder, paramsRef.current[handKey], 'width',
-        { label: 'Width', min: 0.01, max: 0.5, step: 0.01 },
-        `${handKey}.width`, handDefaults.width);
-      bindNumber(handFolder, paramsRef.current[handKey], 'depth',
-        { label: 'Depth', min: 0.01, max: 0.5, step: 0.01 },
-        `${handKey}.depth`, handDefaults.depth);
+      bindNumber(handFolder, paramsRef.current[handKey], 'thickness',
+        { label: 'Thickness', min: 0.01, max: 0.5, step: 0.01 },
+        `${handKey}.thickness`, handDefaults.thickness);
 
       // Tip Circle subgroup (existing)
       const tipCircleFolder = handFolder.addFolder({ title: 'Tip Circle', expanded: false });
@@ -565,12 +562,8 @@ export const ClockControls = ({
           params.set(`${handKey}Length`, round(hand.length, 1));
         }
 
-        if (hand.width !== defaultHand.width) {
-          params.set(`${handKey}Width`, round(hand.width, 2));
-        }
-
-        if (hand.depth !== defaultHand.depth) {
-          params.set(`${handKey}Depth`, round(hand.depth, 2));
+        if (hand.thickness !== defaultHand.thickness) {
+          params.set(`${handKey}Thickness`, round(hand.thickness, 2));
         }
 
         // Tip circle

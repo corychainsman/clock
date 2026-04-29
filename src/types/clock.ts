@@ -35,8 +35,7 @@ export interface ClockHand {
   show: boolean;
   color: string;
   length: number;
-  width: number;
-  depth: number;
+  thickness: number;
   circle: HandCircle;
   centerCircle: HandCenterCircle;
   endCap: HandEndCap;
@@ -110,8 +109,7 @@ export const DEFAULT_CONFIG: ClockConfig = {
     show: true,
     color: "#1e88e5",
     length: 2.9,
-    width: 0.1,
-    depth: 0.1,
+    thickness: 0.1,
     circle: {
       show: false,
       radius: 0.15,
@@ -125,8 +123,7 @@ export const DEFAULT_CONFIG: ClockConfig = {
     show: true,
     color: "#ffd600",
     length: 3.8,
-    width: 0.1,
-    depth: 0.1,
+    thickness: 0.1,
     circle: {
       show: false,
       radius: 0.12,
@@ -140,8 +137,7 @@ export const DEFAULT_CONFIG: ClockConfig = {
     show: true,
     color: "#d32f2f",
     length: 4.2,
-    width: 0.05,
-    depth: 0.05,
+    thickness: 0.05,
     circle: {
       show: false,
       radius: 0.08,
