@@ -10,57 +10,101 @@ import { updateFavicon } from "./utils/faviconGenerator";
 import { downloadBlob, exportPrintModelZip, PRINT_FONT_URL } from "./utils/printModel";
 import "./App.css";
 
+const HEX_RE = /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/;
+
+const parseNumberInRange = (
+  raw: string | null,
+  min: number,
+  max: number,
+): number | undefined => {
+  if (raw === null) return undefined;
+  const num = parseFloat(raw);
+  if (isNaN(num) || num < min || num > max) return undefined;
+  return num;
+};
+
+const parseBool = (raw: string | null): boolean | undefined => {
+  if (raw === null) return undefined;
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  return undefined;
+};
+
+const parseHexColor = (raw: string | null): string | undefined => {
+  if (raw === null || !HEX_RE.test(raw)) return undefined;
+  return `#${raw}`;
+};
+
 const getConfigFromURL = (): ClockConfig => {
   const params = new URLSearchParams(window.location.search);
   const config: ClockConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG)); // Deep copy
-  
+
   const hands = ['hourHand', 'minuteHand', 'secondHand'] as const;
-  
+
   // Parse hand parameters
   hands.forEach(handKey => {
     const hand = config[handKey];
-    
-    // Parse hand color
-    const colorValue = params.get(`${handKey}Color`);
-    if (colorValue && /^[0-9A-Fa-f]{3}$|^[0-9A-Fa-f]{6}$/.test(colorValue)) {
-      hand.color = `#${colorValue}`;
+
+    const showValue = parseBool(params.get(`${handKey}Show`));
+    if (showValue !== undefined) hand.show = showValue;
+
+    const colorValue = parseHexColor(params.get(`${handKey}Color`));
+    if (colorValue) hand.color = colorValue;
+
+    const lengthValue = parseNumberInRange(params.get(`${handKey}Length`), 0.1, 10);
+    if (lengthValue !== undefined) hand.length = lengthValue;
+
+    const widthValue = parseNumberInRange(params.get(`${handKey}Width`), 0.005, 1);
+    if (widthValue !== undefined) hand.width = widthValue;
+
+    const depthValue = parseNumberInRange(params.get(`${handKey}Depth`), 0.005, 1);
+    if (depthValue !== undefined) hand.depth = depthValue;
+
+    // Tip circle
+    const circleShow = parseBool(params.get(`${handKey}CircleShow`));
+    if (circleShow !== undefined) hand.circle.show = circleShow;
+    const circleRadius = parseNumberInRange(params.get(`${handKey}CircleRadius`), 0.01, 1);
+    if (circleRadius !== undefined) hand.circle.radius = circleRadius;
+    const circleFilled = parseBool(params.get(`${handKey}CircleFilled`));
+    if (circleFilled !== undefined) hand.circle.filled = circleFilled;
+    const circleStroke = parseNumberInRange(params.get(`${handKey}CircleStrokeWidth`), 0.01, 0.5);
+    if (circleStroke !== undefined) hand.circle.strokeWidth = circleStroke;
+
+    // Center circle
+    const centerShow = parseBool(params.get(`${handKey}CenterShow`));
+    if (centerShow !== undefined) hand.centerCircle.show = centerShow;
+    const centerRadius = parseNumberInRange(params.get(`${handKey}CenterRadius`), 0.01, 2);
+    if (centerRadius !== undefined) hand.centerCircle.radius = centerRadius;
+    const centerFilled = parseBool(params.get(`${handKey}CenterFilled`));
+    if (centerFilled !== undefined) hand.centerCircle.filled = centerFilled;
+    const centerStroke = parseNumberInRange(params.get(`${handKey}CenterStroke`), 0.01, 0.5);
+    if (centerStroke !== undefined) hand.centerCircle.strokeWidth = centerStroke;
+    const centerColor = parseHexColor(params.get(`${handKey}CenterColor`));
+    if (centerColor) hand.centerCircle.color = centerColor;
+
+    // End cap
+    const capShape = params.get(`${handKey}CapShape`);
+    if (capShape === 'flat' || capShape === 'rounded' || capShape === 'pointed') {
+      hand.endCap.shape = capShape;
     }
-    
-    // Parse hand length
-    const lengthValue = params.get(`${handKey}Length`);
-    if (lengthValue) {
-      const numValue = parseFloat(lengthValue);
-      if (!isNaN(numValue) && numValue >= 0.1 && numValue <= 10) {
-        hand.length = numValue;
-      }
-    }
-    
-    // Parse circle parameters
-    const circleShowValue = params.get(`${handKey}CircleShow`);
-    if (circleShowValue !== null) {
-      hand.circle.show = circleShowValue === 'true';
-    }
-    
-    const circleRadiusValue = params.get(`${handKey}CircleRadius`);
-    if (circleRadiusValue) {
-      const numValue = parseFloat(circleRadiusValue);
-      if (!isNaN(numValue) && numValue >= 0.01 && numValue <= 1) {
-        hand.circle.radius = numValue;
-      }
-    }
-    
-    const circleFilledValue = params.get(`${handKey}CircleFilled`);
-    if (circleFilledValue !== null) {
-      hand.circle.filled = circleFilledValue === 'true';
-    }
-    
-    const circleStrokeWidthValue = params.get(`${handKey}CircleStrokeWidth`);
-    if (circleStrokeWidthValue) {
-      const numValue = parseFloat(circleStrokeWidthValue);
-      if (!isNaN(numValue) && numValue >= 0.01 && numValue <= 0.5) {
-        hand.circle.strokeWidth = numValue;
-      }
-    }
+    const tipRadius = parseNumberInRange(params.get(`${handKey}TipRadius`), 0, 1);
+    if (tipRadius !== undefined) hand.endCap.tipRadius = tipRadius;
+    const tipAngle = parseNumberInRange(params.get(`${handKey}TipAngle`), 1, 179);
+    if (tipAngle !== undefined) hand.endCap.tipAngle = tipAngle;
+    const baseScale = parseNumberInRange(params.get(`${handKey}BaseScale`), 0.1, 10);
+    if (baseScale !== undefined) hand.endCap.baseScale = baseScale;
+    const tipScale = parseNumberInRange(params.get(`${handKey}TipScale`), 0.05, 10);
+    if (tipScale !== undefined) hand.endCap.tipScale = tipScale;
+
+    // Slot
+    const slotShow = parseBool(params.get(`${handKey}SlotShow`));
+    if (slotShow !== undefined) hand.endCap.slot.show = slotShow;
+    const slotLength = parseNumberInRange(params.get(`${handKey}SlotLength`), 0.01, 10);
+    if (slotLength !== undefined) hand.endCap.slot.length = slotLength;
+    const slotWidth = parseNumberInRange(params.get(`${handKey}SlotWidth`), 0.001, 1);
+    if (slotWidth !== undefined) hand.endCap.slot.width = slotWidth;
+    const slotInset = parseNumberInRange(params.get(`${handKey}SlotInset`), 0, 10);
+    if (slotInset !== undefined) hand.endCap.slot.inset = slotInset;
   });
   
   // Parse face parameters

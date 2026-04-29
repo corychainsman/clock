@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Text } from "@react-three/drei";
-import type { ClockConfig } from "../types/clock";
+import { ExtrudeGeometry, Path, Shape } from "three";
+import type { ClockConfig, ClockHand } from "../types/clock";
 import { useResponsiveCamera } from "../hooks/useResponsiveCamera";
 
 // Clock face component
@@ -109,15 +110,161 @@ const TickMarks = ({ radius, color }: { radius: number; color: string }) => {
   );
 };
 
+// Build the 2D shape (with optional slot hole) for a hand
+const buildHandShape = (hand: ClockHand): Shape => {
+  const shape = new Shape();
+  const length = Math.max(hand.length, 0.01);
+  const baseWidth = Math.max(hand.width * hand.endCap.baseScale, 0.001);
+  const tipWidth = Math.max(hand.width * hand.endCap.tipScale, 0.001);
+
+  // Outer outline, traced counter-clockwise so the front face normal points +Z.
+  shape.moveTo(baseWidth / 2, 0);
+
+  if (hand.endCap.shape === "rounded") {
+    const r = Math.max(0, Math.min(hand.endCap.tipRadius, tipWidth / 2, length));
+    shape.lineTo(tipWidth / 2, length - r);
+    if (r > 0) {
+      shape.quadraticCurveTo(tipWidth / 2, length, tipWidth / 2 - r, length);
+      shape.lineTo(-tipWidth / 2 + r, length);
+      shape.quadraticCurveTo(-tipWidth / 2, length, -tipWidth / 2, length - r);
+    } else {
+      shape.lineTo(-tipWidth / 2, length);
+    }
+  } else if (hand.endCap.shape === "pointed") {
+    const angleDeg = Math.max(1, Math.min(179, hand.endCap.tipAngle));
+    const halfAngle = (angleDeg * Math.PI) / 360;
+    const extension = (tipWidth / 2) / Math.tan(halfAngle);
+    shape.lineTo(tipWidth / 2, length);
+    shape.lineTo(0, length + extension);
+    shape.lineTo(-tipWidth / 2, length);
+  } else {
+    shape.lineTo(tipWidth / 2, length);
+    shape.lineTo(-tipWidth / 2, length);
+  }
+
+  shape.lineTo(-baseWidth / 2, 0);
+  shape.lineTo(baseWidth / 2, 0);
+
+  if (hand.endCap.slot.show) {
+    const slot = hand.endCap.slot;
+    const safeLength = Math.max(0.001, Math.min(slot.length, length - Math.max(0, slot.inset)));
+    const slotCenterY = length - Math.max(0, slot.inset) - safeLength / 2;
+    const t = length === 0 ? 0 : Math.max(0, Math.min(1, slotCenterY / length));
+    const localWidth = baseWidth + (tipWidth - baseWidth) * t;
+    const safeWidth = Math.max(0.001, Math.min(slot.width, localWidth * 0.85));
+
+    const hole = new Path();
+    const xR = safeWidth / 2;
+    const yT = slotCenterY + safeLength / 2;
+    const yB = slotCenterY - safeLength / 2;
+    // Hole traced clockwise (opposite of outer ring) to count as a hole.
+    hole.moveTo(xR, yB);
+    hole.lineTo(-xR, yB);
+    hole.lineTo(-xR, yT);
+    hole.lineTo(xR, yT);
+    hole.lineTo(xR, yB);
+    shape.holes.push(hole);
+  }
+
+  return shape;
+};
+
+const Hand = ({ hand, angle }: { hand: ClockHand; angle: number }) => {
+  const geometry = useMemo(() => {
+    const shape = buildHandShape(hand);
+    return new ExtrudeGeometry(shape, {
+      depth: Math.max(0.001, hand.depth),
+      bevelEnabled: false,
+      curveSegments: 24,
+    });
+    // hand reference changes every render (Clock re-spreads it for NaN guards),
+    // so depend on the geometry-affecting primitives instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    hand.length,
+    hand.width,
+    hand.depth,
+    hand.endCap.shape,
+    hand.endCap.tipRadius,
+    hand.endCap.tipAngle,
+    hand.endCap.baseScale,
+    hand.endCap.tipScale,
+    hand.endCap.slot.show,
+    hand.endCap.slot.length,
+    hand.endCap.slot.width,
+    hand.endCap.slot.inset,
+  ]);
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
+
+  if (!hand.show) return null;
+
+  // The body is extruded from z=0 to z=depth. Place caps just above the front face.
+  const capZ = hand.depth + 0.01;
+  const tipCircle = hand.circle;
+  const center = hand.centerCircle;
+  const centerColor = center.color || hand.color;
+
+  return (
+    <group rotation={[0, 0, angle]}>
+      <mesh geometry={geometry}>
+        <meshBasicMaterial color={hand.color} />
+      </mesh>
+      {tipCircle.show && (
+        <mesh position={[0, hand.length + tipCircle.radius, capZ]}>
+          {tipCircle.filled ? (
+            <>
+              <circleGeometry args={[tipCircle.radius, 32]} />
+              <meshBasicMaterial color={hand.color} />
+            </>
+          ) : (
+            <>
+              <ringGeometry
+                args={[
+                  Math.max(0, tipCircle.radius - tipCircle.strokeWidth / 2),
+                  tipCircle.radius + tipCircle.strokeWidth / 2,
+                  32,
+                ]}
+              />
+              <meshBasicMaterial color={hand.color} />
+            </>
+          )}
+        </mesh>
+      )}
+      {center.show && (
+        <mesh position={[0, 0, capZ]}>
+          {center.filled ? (
+            <>
+              <circleGeometry args={[center.radius, 64]} />
+              <meshBasicMaterial color={centerColor} />
+            </>
+          ) : (
+            <>
+              <ringGeometry
+                args={[
+                  Math.max(0, center.radius - center.strokeWidth / 2),
+                  center.radius + center.strokeWidth / 2,
+                  64,
+                ]}
+              />
+              <meshBasicMaterial color={centerColor} />
+            </>
+          )}
+        </mesh>
+      )}
+    </group>
+  );
+};
+
 // Clock hands component
 const ClockHands = ({
   hourHand,
   minuteHand,
   secondHand,
 }: {
-  hourHand: ClockConfig['hourHand'];
-  minuteHand: ClockConfig['minuteHand'];
-  secondHand: ClockConfig['secondHand'];
+  hourHand: ClockHand;
+  minuteHand: ClockHand;
+  secondHand: ClockHand;
 }) => {
   const [time, setTime] = useState(new Date());
 
@@ -138,74 +285,9 @@ const ClockHands = ({
 
   return (
     <group>
-      {/* Hour hand */}
-      <group rotation={[0, 0, hourAngle]}>
-        <mesh position={[0, hourHand.length / 2, 0]}>
-          <boxGeometry args={[0.1, hourHand.length, 0.1]} />
-          <meshBasicMaterial color={hourHand.color} />
-        </mesh>
-        {hourHand.circle.show && (
-          <mesh position={[0, hourHand.length + hourHand.circle.radius, 0.1]}>
-            {hourHand.circle.filled ? (
-              <>
-                <circleGeometry args={[hourHand.circle.radius, 32]} />
-                <meshBasicMaterial color={hourHand.color} />
-              </>
-            ) : (
-              <>
-                <ringGeometry args={[hourHand.circle.radius - hourHand.circle.strokeWidth/2, hourHand.circle.radius + hourHand.circle.strokeWidth/2, 32]} />
-                <meshBasicMaterial color={hourHand.color} />
-              </>
-            )}
-          </mesh>
-        )}
-      </group>
-
-      {/* Minute hand */}
-      <group rotation={[0, 0, minuteAngle]}>
-        <mesh position={[0, minuteHand.length / 2, 0]}>
-          <boxGeometry args={[0.1, minuteHand.length, 0.1]} />
-          <meshBasicMaterial color={minuteHand.color} />
-        </mesh>
-        {minuteHand.circle.show && (
-          <mesh position={[0, minuteHand.length + minuteHand.circle.radius, 0.1]}>
-            {minuteHand.circle.filled ? (
-              <>
-                <circleGeometry args={[minuteHand.circle.radius, 32]} />
-                <meshBasicMaterial color={minuteHand.color} />
-              </>
-            ) : (
-              <>
-                <ringGeometry args={[minuteHand.circle.radius - minuteHand.circle.strokeWidth/2, minuteHand.circle.radius + minuteHand.circle.strokeWidth/2, 32]} />
-                <meshBasicMaterial color={minuteHand.color} />
-              </>
-            )}
-          </mesh>
-        )}
-      </group>
-
-      {/* Second hand */}
-      <group rotation={[0, 0, secondAngle]}>
-        <mesh position={[0, secondHand.length / 2, 0]}>
-          <boxGeometry args={[0.05, secondHand.length, 0.05]} />
-          <meshBasicMaterial color={secondHand.color} />
-        </mesh>
-        {secondHand.circle.show && (
-          <mesh position={[0, secondHand.length + secondHand.circle.radius, 0.1]}>
-            {secondHand.circle.filled ? (
-              <>
-                <circleGeometry args={[secondHand.circle.radius, 32]} />
-                <meshBasicMaterial color={secondHand.color} />
-              </>
-            ) : (
-              <>
-                <ringGeometry args={[secondHand.circle.radius - secondHand.circle.strokeWidth/2, secondHand.circle.radius + secondHand.circle.strokeWidth/2, 32]} />
-                <meshBasicMaterial color={secondHand.color} />
-              </>
-            )}
-          </mesh>
-        )}
-      </group>
+      <Hand hand={hourHand} angle={hourAngle} />
+      <Hand hand={minuteHand} angle={minuteAngle} />
+      <Hand hand={secondHand} angle={secondAngle} />
     </group>
   );
 };
